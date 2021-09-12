@@ -108,7 +108,7 @@
 15. 使用RPM安装软件包必须考虑与其他RPM包的依赖关系，`rpm -qR [包全名]`可以用来查询已安装软件包所依赖的其他包；`rpm -qRp [包全名]`可以查看未安装软件吧的依赖关系
 
 #### shell脚本编程基础
-1. shell是一个交互性命令解释器（用C语言编写的程序）——一个读入并解释用户输入命令的程序
+1. shell是一个交互性命令解释器（用C语言编写的程序）——一个读入并解释用户输入命令的程序，它是连接
 2. 通过`cat /etc/shells` 可以查看脚本的解释程序（即shell的种类） 最常见的Bourne shell（sh）、C shell（csh）、Korn shell（ksh）和Bourne-again shell（bash）
 3. shell脚本文件第一行`#! /bin/bash` 说明使用那种shell脚本编写
 4. bash别名设置就是赋予一条命令或一列命令新的名称，可以将别名设为缩写或者使用别名创建已有的命令自定义变体 如`alias ll='ls -l'`
@@ -147,7 +147,7 @@
 13. 使用||连接命令则只有前一条命令执行错误，后一条命令才会执行
 14. 小括号在执行组命令时，需要重新开启一个子shell来执行。大括号是在当前shell中执行。
 15. 管道符| 前一个命令的输出是后一个命令的输入
-16. 后台命令符 &，#单行注释
+16. 后台命令符 &
 17. shell变量赋值=号两边不能有空格，如果字符串有空格就必须用加上引号`name="zhang jay"`
 18. 程序在引用变量名前要加上"$"符号 `echo $name`
 19. 防止变量名出现歧义可以用大括号括起来{}`echo ${name}`,注意不能用小括号，`$()`等价于倒引号(``)
@@ -159,7 +159,103 @@
     4. $#： 命令行所有参数的个数
 22. 环境变量也是系统预定义变量，环境变量是全局变量
 23. export 变量名 将用户自定义变量成为全局变量
-24. 设置变量set 注销变量 unset，查询变量的方式有三种，set、env和export。env可以查询所有环境变量、set可以查询局部和全局变量
-25. 所有变量默认为字符串类型
-26. declare 声明变量类型 -设置类型属性； +取消属性; -a声明数组型; -i声明整型; -r只读; -x环境变量;
-27. Let和expr变量，可以用来声明变量：`dd=$(expr $aa + $bb)`;`let dd=$aa+$bb`;或者使用算术表达式`ff=$ (( $aa + $bb ))`
+24. 环境变量PATH的作用是决定了shell将到哪些目录中寻找命令或可执行程序
+25. 设置变量set 注销变量 unset，查询变量的方式有三种，set、env和export。env可以查询所有环境变量、set可以查询局部和全局变量
+26. 所有变量默认为字符串类型
+27. declare 声明变量类型 -设置类型属性； +取消属性; -a声明数组型; -i声明整型; -r只读; -x环境变量;
+28. Let和expr变量，可以用来声明变量：`dd=$(expr $aa + $bb)`;`let dd=$aa+$bb`;或者使用算术表达式`ff=$ (( $aa + $bb ))`
+29. shell if语句;测试条件用test xxxx或者方括号内[ xxxxx ]（方括号两边都要有空格）;0为真、1为假
+    ```shell
+    if test -f "$1"
+        then echo "$1 is an ordinary file"
+    elif [ -w "$1" ]
+        then echo "$1 is can write"
+    else
+        then echo "$1 not an ordinary file"
+    fi
+    ```
+30. lt：less than 小于
+    le：less than or equal to 小于等于
+    eq：equal to 等于
+    ne：not equal to 不等于
+    ge：greater than or equal to 大于等于
+    gt：greater than 大于
+31. case语句,每个case分支要用双分号结尾 “;;”
+    ```shell
+    #! /bin/bash
+    echo -n "delete file?(yes/no)"
+    read answer
+    case $answer in
+        "yes") echo "your answer is yes!"
+                rm file;;
+        "no") echo "do not!";;
+        *) echo "choice is error!";;
+    ```
+32. while 语句
+    ```shell
+    i=1
+    sum=0
+    while [ "$i" -le 100 ]
+    do 
+        (( sum+=i ))
+        (( i++ ))
+    done
+    echo "The sum is $sum"
+    # 输出结果 5050
+    ```
+33. unit语句，与while正好相反 当判断不成立时进行循环
+34. for循环，在循环期间可以使用break关键字直接跳出结束循环
+    ```shell
+    sum=0
+    for(( i=1;i<=100;i++ ))
+    do
+        if (( i>=50 ));then
+            break
+        if
+        (( sum+=i ))
+    done
+    echo "The sum is $sum"
+    # 输出结果 5050
+    ```
+
+    值循环表达式
+    ```shell
+    sum=0
+    for n in 1 2 3 4 5 6
+    do 
+        echo $n
+        (( sum+=n ))
+    done
+    echo $sum
+    ```
+35. select in 语句
+    ```shell
+    echo "what is your favourite OS?"
+    select name in "Linux" "Windows" "Mac OS"
+    do 
+        echo "You have selected $ name"
+    done
+    ```
+    运行结果
+    ```bash
+    what is your favourite OS?
+    1) Linux
+    2) Windows
+    3) Mac OS
+    #? 
+    ```
+    键盘输入1后：
+    ```
+    what is your favourite OS?
+    1) Linux
+    2) Windows
+    3) Mac OS
+    #? 1
+    You have selected Linux
+    ```
+
+#### 用户管理
+1. 用户和用户组的对应关系 一对一、一对多、多对一、多对多
+2. 用户名与ID的对应关系在/etc/passwd文件中
+3. 用户组名称ID的对应关系在/etc/group 
+4. /etc/passwd 中用x表示此用户设有密码，真正密码在/etc/shadow中
